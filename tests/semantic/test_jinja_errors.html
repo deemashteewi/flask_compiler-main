@@ -1,0 +1,28 @@
+{% set x = 5 %}
+{{ y }}
+
+{% macro greet(name) %}
+Hello {{ name }}
+{% endmacro %}
+
+{% macro greet(name) %}
+Hi {{ name }}
+{% endmacro %}
+
+{{ greet("Ali", "extra") }}
+
+{{ undefined_macro() }}
+
+{% block header %}Header 1{% endblock %}
+{% block header %}Header 2{% endblock %}
+
+{% macro welcome(name, name) %}
+Welcome {{ name }}
+{% endmacro %}
+
+{{ greet(name="Ali", name="Sara") }}
+{{ x() }}
+{{ loop.index }}
+{% block footer %}Footer content{% endblock wrongname %}
+{% extends "base.html" %}
+{% extends "other.html" %}

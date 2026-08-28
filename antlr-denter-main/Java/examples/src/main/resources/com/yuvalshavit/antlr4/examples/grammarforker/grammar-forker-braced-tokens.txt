@@ -1,0 +1,3 @@
+INDENT: '${INDENT_BRACE}';
+DEDENT: '${DEDENT_BRACE}';
+NL:     '\r'? '\n';

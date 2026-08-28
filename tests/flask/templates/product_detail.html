@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product Details</title>
+        <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="page-detail">
+    <nav class="navbar">
+        <a href="/" class="nav-brand">Shop</a>
+        <a href="/" class="nav-link">Products</a>
+        <a href="/add" class="nav-link">Add Product</a>
+    </nav>
+    <div class="container">
+        <a href="/" class="back-link">Back to Products</a>
+
+        {% if product %}
+        <div class="product-detail">
+            <div class="product-image">
+                <img src="{{ product.image }}" alt="{{ product.name }}">
+            </div>
+            <div class="product-content">
+                <div class="product-name">{{ product.name }}</div>
+                <div class="product-price">${{ product.price }}</div>
+                <p class="details-label">Description</p>
+                <p class="product-details">{{ product.details }}</p>
+                <div class="detail-actions">
+                    <a href="/delete/{{ product.id }}" class="delete-button">Delete Product</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="not-found">
+            <p>Product not found.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

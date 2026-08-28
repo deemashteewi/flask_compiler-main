@@ -1,0 +1,412 @@
+/* ==================== مشترك بين كل الصفحات ==================== */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f3f4f6;
+    min-height: 100vh;
+    color: #374151;
+}
+.navbar {
+    background: white;
+    padding: 16px 24px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.nav-brand {
+    font-weight: 700;
+    font-size: 18px;
+    color: #111827;
+    margin-right: 16px;
+    text-decoration: none;
+}
+.nav-link {
+    color: #6b7280;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: color 0.2s ease;
+}
+.nav-link:hover, .nav-link.active {
+    color: #1a56db;
+}
+
+/* ==================== صفحة المنتجات (index) ==================== */
+.page-index .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 24px;
+}
+.page-index h1 {
+    color: #111827;
+    text-align: center;
+    font-size: 48px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.02em;
+}
+.page-index .subtitle {
+    text-align: center;
+    color: #6b7280;
+    font-size: 18px;
+    margin-bottom: 48px;
+}
+.page-index .header-section {
+    text-align: center;
+    margin-bottom: 48px;
+}
+.page-index .button {
+    background-color: #1a56db;
+    color: white;
+    padding: 14px 28px;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+}
+.page-index .button:hover {
+    background-color: #1e40af;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+.page-index .product-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+}
+.page-index .product-card {
+    background: white;
+    border-radius: 12px;
+    padding: 0;
+    width: 300px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+.page-index .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+.page-index .product-image {
+    background: #f9fafb;
+    padding: 24px;
+}
+.page-index .product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    display: block;
+}
+.page-index .product-info {
+    padding: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+.page-index .product-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: #111827;
+}
+.page-index .product-price {
+    color: #059669;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 12px 0;
+}
+.page-index .card-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    align-items: center;
+}
+.page-index .view-link {
+    color: #1a56db;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+.page-index .view-link:hover {
+    color: #1e40af;
+}
+.page-index .delete-link {
+    color: #dc2626;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+.page-index .delete-link:hover {
+    color: #991b1b;
+}
+
+/* ==================== صفحة إضافة منتج ==================== */
+.page-add .page-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 48px 24px;
+}
+.page-add .container {
+    background: white;
+    padding: 48px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    max-width: 480px;
+    width: 100%;
+}
+.page-add h1 {
+    color: #111827;
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.02em;
+}
+.page-add .subtitle {
+    text-align: center;
+    color: #6b7280;
+    font-size: 15px;
+    margin: 0 0 32px 0;
+}
+.page-add .form-group {
+    margin: 0 0 24px 0;
+}
+.page-add label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+}
+.page-add input, .page-add textarea {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    background: #f9fafb;
+}
+.page-add input:focus, .page-add textarea:focus {
+    outline: none;
+    border-color: #1a56db;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+}
+.page-add textarea {
+    height: 120px;
+    resize: vertical;
+}
+.page-add .button {
+    background-color: #1a56db;
+    color: white;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    margin-top: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+.page-add .button:hover {
+    background-color: #1e40af;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+.page-add .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 24px;
+    color: #6b7280;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+.page-add .back-link:hover {
+    color: #1a56db;
+}
+
+/* ==================== صفحة تفاصيل منتج ==================== */
+.page-detail .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 60px 24px;
+}
+.page-detail .back-link {
+    display: inline-block;
+    color: #6b7280;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 24px;
+    transition: color 0.2s ease;
+}
+.page-detail .back-link:hover {
+    color: #1a56db;
+}
+.page-detail .product-detail {
+    background: white;
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+.page-detail .product-image {
+    background: #f9fafb;
+    padding: 32px;
+}
+.page-detail .product-detail img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    display: block;
+}
+.page-detail .product-content {
+    padding: 32px;
+    border-top: 1px solid #e5e7eb;
+}
+.page-detail .product-name {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    color: #111827;
+    letter-spacing: -0.02em;
+}
+.page-detail .product-price {
+    font-size: 32px;
+    color: #059669;
+    font-weight: 700;
+    margin: 0 0 24px 0;
+}
+.page-detail .details-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin: 0 0 8px 0;
+}
+.page-detail .product-details {
+    font-size: 16px;
+    margin: 0 0 32px 0;
+    line-height: 1.7;
+    color: #374151;
+}
+.page-detail .detail-actions {
+    display: flex;
+    gap: 16px;
+}
+.page-detail .delete-button {
+    display: inline-block;
+    background-color: #dc2626;
+    color: white;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+.page-detail .delete-button:hover {
+    background-color: #991b1b;
+}
+.page-detail .not-found {
+    background: white;
+    padding: 60px 40px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+.page-detail .not-found p {
+    color: #6b7280;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* ==================== صفحة حذف منتج ==================== */
+.page-delete .page-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 60px 24px;
+}
+.page-delete .container {
+    background: white;
+    padding: 48px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+}
+.page-delete h1 {
+    color: #111827;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+}
+.page-delete .warning {
+    color: #6b7280;
+    font-size: 15px;
+    margin: 0 0 24px 0;
+    line-height: 1.6;
+}
+.page-delete .delete-product-name {
+    font-weight: 700;
+    color: #111827;
+}
+.page-delete .actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
+.page-delete .delete-form {
+    flex: 1;
+    margin: 0;
+}
+.page-delete .button {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+}
+.page-delete .confirm-button {
+    background-color: #dc2626;
+    color: white;
+}
+.page-delete .confirm-button:hover {
+    background-color: #991b1b;
+}
+.page-delete .cancel-link {
+    background-color: #e5e7eb;
+    color: #374151;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.page-delete .cancel-link:hover {
+    background-color: #d1d5db;
+}
+.page-delete .not-found p {
+    color: #6b7280;
+    font-size: 16px;
+}

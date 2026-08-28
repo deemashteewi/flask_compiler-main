@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Product</title>
+        <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="page-delete">
+    <nav class="navbar">
+        <a href="/" class="nav-brand">Shop</a>
+        <a href="/" class="nav-link">Products</a>
+        <a href="/add" class="nav-link">Add Product</a>
+    </nav>
+    <div class="page-wrap">
+        <div class="container">
+            
+            <h1>Delete Product</h1>
+            <p class="warning">Are you sure you want to delete
+                <span class="delete-product-name">Laptop</span>?
+                This action cannot be undone.</p>
+            <div class="actions">
+                <form method="POST" class="delete-form">
+                    <button type="submit" class="button confirm-button">Yes, Delete</button>
+                </form>
+                <a href="/product/1" class="button cancel-link">Cancel</a>
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>

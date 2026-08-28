@@ -1,0 +1,8 @@
+x = 15
+if x > 10:
+    if x > 20:
+        print(1)
+    else:
+        print(2)
+else:
+    print(3)

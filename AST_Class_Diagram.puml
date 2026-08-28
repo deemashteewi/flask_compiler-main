@@ -1,0 +1,1072 @@
+@startuml AST Class Diagram
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam groupInheritance 2
+
+title ANTLR Multi-Language Compiler - AST Class Diagram
+
+' ==================== Base Classes ====================
+
+package "ast.node" {
+    abstract class ASTNode {
+        # nodeName: String
+        # lineNumber: int
+        # columnNumber: int
+        # parent: ASTNode
+        --
+        + ASTNode(nodeName, lineNumber, columnNumber)
+        + getNodeName(): String
+        + getLineNumber(): int
+        + getColumnNumber(): int
+        + getParent(): ASTNode
+        + setParent(parent: ASTNode): void
+        + {abstract} accept(visitor: ASTVisitor<T>): T
+        + {abstract} getChildren(): List<ASTNode>
+        # getExtraInfo(): String
+        + toString(indent: int): String
+    }
+}
+
+package "ast.visitor" {
+    interface ASTVisitor<T> {
+        + visit(ProgramNode): T
+        + visit(StatementNode): T
+        + visit(ExpressionNode): T
+        + visit(TemplateNode): T
+        + ...70+ visit methods
+    }
+}
+
+ASTNode ..> ASTVisitor : uses
+
+' ==================== Python AST ====================
+
+package "ast.python" <<Rectangle>> {
+
+    class ProgramNode {
+        - statements: List<StatementNode>
+        --
+        + ProgramNode(lineNumber: int)
+        + addStatement(statement: StatementNode): void
+        + getStatements(): List<StatementNode>
+        + getStatementCount(): int
+    }
+
+    abstract class StatementNode {
+        + StatementNode(nodeName, lineNumber, columnNumber)
+        + StatementNode(nodeName, lineNumber)
+    }
+
+    abstract class ExpressionNode {
+        + ExpressionNode(nodeName, lineNumber, columnNumber)
+        + {abstract} toValueString(): String
+    }
+
+    abstract class ParameterNode {
+        # name: String
+        # defaultValue: ExpressionNode
+        --
+        + getName(): String
+        + hasDefaultValue(): boolean
+        + getDefaultValue(): ExpressionNode
+    }
+}
+
+ASTNode <|-- ProgramNode
+ASTNode <|-- StatementNode
+ASTNode <|-- ExpressionNode
+ASTNode <|-- ParameterNode
+
+ProgramNode o-- "many" StatementNode
+
+' ==================== Python Statements ====================
+
+package "ast.python.statements" <<Rectangle>> {
+
+    class AssignmentNode {
+        - targetName: String
+        - value: ExpressionNode
+        --
+        + getTargetName(): String
+        + getValue(): ExpressionNode
+    }
+
+    class IfStatementNode {
+        - condition: ExpressionNode
+        - thenBlock: BlockNode
+        - elifBranches: List<ElifBranchNode>
+        - elseBlock: BlockNode
+        --
+        + getCondition(): ExpressionNode
+        + getThenBlock(): BlockNode
+        + getElifBranches(): List
+        + getElseBlock(): BlockNode
+    }
+
+    class ForStatementNode {
+        - variable: String
+        - iterable: ExpressionNode
+        - body: BlockNode
+        --
+        + getVariable(): String
+        + getIterable(): ExpressionNode
+        + getBody(): BlockNode
+    }
+
+    class WhileStatementNode {
+        - condition: ExpressionNode
+        - body: BlockNode
+        --
+        + getCondition(): ExpressionNode
+        + getBody(): BlockNode
+    }
+
+    class FunctionDefinitionNode {
+        - name: String
+        - parameters: List<ParameterNode>
+        - body: BlockNode
+        --
+        + getName(): String
+        + getParameters(): List
+        + getBody(): BlockNode
+    }
+
+    class ClassDefinitionNode {
+        - name: String
+        - parentClass: String
+        - body: BlockNode
+        --
+        + getName(): String
+        + getParentClass(): String
+        + getBody(): BlockNode
+    }
+
+    class PrintNode {
+        - expression: ExpressionNode
+        --
+        + getExpression(): ExpressionNode
+    }
+
+    class ReturnNode {
+        - value: ExpressionNode
+        --
+        + getValue(): ExpressionNode
+    }
+
+    class BreakNode {
+    }
+
+    class ContinueNode {
+    }
+
+    class BlockNode {
+        - statements: List<StatementNode>
+        --
+        + addStatement(stmt: StatementNode): void
+        + getStatements(): List
+    }
+
+    class ImportStatement {
+        - moduleName: String
+        - importedClasses: List<ImportedClassNode>
+        --
+        + getModuleName(): String
+        + getImportedClasses(): List
+    }
+}
+
+StatementNode <|-- AssignmentNode
+StatementNode <|-- IfStatementNode
+StatementNode <|-- ForStatementNode
+StatementNode <|-- WhileStatementNode
+StatementNode <|-- FunctionDefinitionNode
+StatementNode <|-- ClassDefinitionNode
+StatementNode <|-- PrintNode
+StatementNode <|-- ReturnNode
+StatementNode <|-- BreakNode
+StatementNode <|-- ContinueNode
+StatementNode <|-- BlockNode
+StatementNode <|-- ImportStatement
+
+AssignmentNode *-- ExpressionNode
+IfStatementNode *-- ExpressionNode
+IfStatementNode *-- "2..3" BlockNode
+ForStatementNode *-- ExpressionNode
+ForStatementNode *-- BlockNode
+WhileStatementNode *-- ExpressionNode
+WhileStatementNode *-- BlockNode
+FunctionDefinitionNode *-- "many" ParameterNode
+FunctionDefinitionNode *-- BlockNode
+ClassDefinitionNode *-- BlockNode
+PrintNode *-- ExpressionNode
+ReturnNode *-- ExpressionNode
+BlockNode o-- "many" StatementNode
+
+' ==================== Python Expressions - Literals ====================
+
+package "ast.python.expressions.literals" <<Rectangle>> {
+
+    class NumberIntegerNode {
+        - value: int
+        --
+        + getValue(): int
+    }
+
+    class NumberDoubleNode {
+        - value: double
+        --
+        + getValue(): double
+    }
+
+    class StringNode {
+        - value: String
+        --
+        + getValue(): String
+    }
+
+    class BooleanNode {
+        - value: boolean
+        --
+        + isValue(): boolean
+    }
+
+    class NoneNode {
+    }
+
+    class ListNode {
+        - elements: List<ExpressionNode>
+        --
+        + getElements(): List
+        + addElement(expr: ExpressionNode): void
+    }
+
+    class DictNode {
+        - entries: List<DictEntryNode>
+        --
+        + getEntries(): List
+        + addEntry(entry: DictEntryNode): void
+    }
+
+    class DictEntryNode {
+        - key: ExpressionNode
+        - value: ExpressionNode
+        --
+        + getKey(): ExpressionNode
+        + getValue(): ExpressionNode
+    }
+}
+
+ExpressionNode <|-- NumberIntegerNode
+ExpressionNode <|-- NumberDoubleNode
+ExpressionNode <|-- StringNode
+ExpressionNode <|-- BooleanNode
+ExpressionNode <|-- NoneNode
+ExpressionNode <|-- ListNode
+ExpressionNode <|-- DictNode
+ASTNode <|-- DictEntryNode
+
+ListNode o-- "many" ExpressionNode
+DictNode o-- "many" DictEntryNode
+DictEntryNode *-- "2" ExpressionNode
+
+' ==================== Python Expressions - Operations ====================
+
+package "ast.python.expressions.operations" <<Rectangle>> {
+
+    class BinaryOpNode {
+        - operator: Operator
+        - left: ExpressionNode
+        - right: ExpressionNode
+        --
+        + getOperator(): Operator
+        + getLeft(): ExpressionNode
+        + getRight(): ExpressionNode
+    }
+
+    class UnaryOpNode {
+        - operator: Operator
+        - operand: ExpressionNode
+        --
+        + getOperator(): Operator
+        + getOperand(): ExpressionNode
+    }
+
+    class ComparisonNode {
+        - operator: Operator
+        - left: ExpressionNode
+        - right: ExpressionNode
+        --
+        + getOperator(): Operator
+        + getLeft(): ExpressionNode
+        + getRight(): ExpressionNode
+    }
+
+    class LogicalOpNode {
+        - operator: Operator
+        - left: ExpressionNode
+        - right: ExpressionNode
+        --
+        + getOperator(): Operator
+        + getLeft(): ExpressionNode
+        + getRight(): ExpressionNode
+    }
+
+    enum "BinaryOpNode.Operator" as BinaryOp {
+        ADD, SUB, MUL, DIV
+        MOD, FLOOR_DIV, POW
+    }
+
+    enum "UnaryOpNode.Operator" as UnaryOp {
+        PLUS, MINUS
+    }
+
+    enum "ComparisonNode.Operator" as CompOp {
+        EQ, NEQ, LT, GT
+        LTE, GTE, IN, NOT_IN
+    }
+
+    enum "LogicalOpNode.Operator" as LogicOp {
+        AND, OR, NOT
+    }
+}
+
+ExpressionNode <|-- BinaryOpNode
+ExpressionNode <|-- UnaryOpNode
+ExpressionNode <|-- ComparisonNode
+ExpressionNode <|-- LogicalOpNode
+
+BinaryOpNode *-- "2" ExpressionNode
+BinaryOpNode --> BinaryOp
+UnaryOpNode *-- ExpressionNode
+UnaryOpNode --> UnaryOp
+ComparisonNode *-- "2" ExpressionNode
+ComparisonNode --> CompOp
+LogicalOpNode *-- "2" ExpressionNode
+LogicalOpNode --> LogicOp
+
+' ==================== Python Expressions - Access ====================
+
+package "ast.python.expressions.access" <<Rectangle>> {
+
+    class VariableNode {
+        - name: String
+        --
+        + getName(): String
+    }
+
+    class DotAccessNode {
+        - object: ExpressionNode
+        - attribute: String
+        --
+        + getObject(): ExpressionNode
+        + getAttribute(): String
+    }
+
+    class IndexAccessNode {
+        - object: ExpressionNode
+        - index: ExpressionNode
+        --
+        + getObject(): ExpressionNode
+        + getIndex(): ExpressionNode
+    }
+
+    class FunctionCallNode {
+        - functionName: String
+        - arguments: List<ExpressionNode>
+        - keywordArgs: List<KeywordArgumentNode>
+        --
+        + getFunctionName(): String
+        + getArguments(): List
+        + getKeywordArguments(): List
+    }
+
+    class KeywordArgumentNode {
+        - name: String
+        - value: ExpressionNode
+        --
+        + getName(): String
+        + getValue(): ExpressionNode
+    }
+}
+
+ExpressionNode <|-- VariableNode
+ExpressionNode <|-- DotAccessNode
+ExpressionNode <|-- IndexAccessNode
+ExpressionNode <|-- FunctionCallNode
+ASTNode <|-- KeywordArgumentNode
+
+DotAccessNode *-- ExpressionNode
+IndexAccessNode *-- "2" ExpressionNode
+FunctionCallNode o-- "many" ExpressionNode
+FunctionCallNode o-- "many" KeywordArgumentNode
+KeywordArgumentNode *-- ExpressionNode
+
+' ==================== Python Expressions - Advanced ====================
+
+package "ast.python.expressions" <<Rectangle>> {
+
+    class ListComprehensionNode {
+        - expression: ExpressionNode
+        - variable: String
+        - iterable: ExpressionNode
+        - condition: ExpressionNode
+        --
+        + getExpression(): ExpressionNode
+        + getVariable(): String
+        + getIterable(): ExpressionNode
+        + getCondition(): ExpressionNode
+    }
+}
+
+ExpressionNode <|-- ListComprehensionNode
+ListComprehensionNode *-- "2..3" ExpressionNode
+
+' ==================== Python Parameters ====================
+
+package "ast.python.parameters" <<Rectangle>> {
+
+    class RegularParamNode {
+        - name: String
+        - defaultValue: ExpressionNode
+    }
+
+    class KeywordOnlyParamNode {
+        - name: String
+        - defaultValue: ExpressionNode
+    }
+
+    class StarArgsNode {
+        - name: String
+    }
+
+    class KwargsNode {
+        - name: String
+    }
+
+    class PositionalOnlyParamNode {
+        - name: String
+        - defaultValue: ExpressionNode
+    }
+}
+
+ParameterNode <|-- RegularParamNode
+ParameterNode <|-- KeywordOnlyParamNode
+ParameterNode <|-- StarArgsNode
+ParameterNode <|-- KwargsNode
+ParameterNode <|-- PositionalOnlyParamNode
+
+' ==================== Jinja2 AST ====================
+
+package "ast.jinja2" <<Rectangle>> {
+
+    class TemplateNode {
+        - content: List<ASTNode>
+        --
+        + getContent(): List<ASTNode>
+        + addContent(node: ASTNode): void
+    }
+
+    abstract class JinjaExpressionNode {
+        + JinjaExpressionNode(nodeName, lineNumber)
+    }
+}
+
+ASTNode <|-- TemplateNode
+ASTNode <|-- JinjaExpressionNode
+
+TemplateNode o-- "many" ASTNode
+
+' ==================== Jinja2 Blocks ====================
+
+package "ast.jinja2.blocks" <<Rectangle>> {
+
+    class ForBlockNode {
+        - target: TargetNode
+        - iterable: JinjaExpressionNode
+        - body: List<ASTNode>
+        - elseBody: List<ASTNode>
+        --
+        + getTarget(): TargetNode
+        + getIterable(): JinjaExpressionNode
+        + getBody(): List
+        + getElseBody(): List
+    }
+
+    class IfBlockNode {
+        - condition: JinjaExpressionNode
+        - thenBody: List<ASTNode>
+        - elifBranches: List<ElifBranchNode>
+        - elseBody: List<ASTNode>
+        --
+        + getCondition(): JinjaExpressionNode
+        + getThenBody(): List
+        + getElifBranches(): List
+        + getElseBody(): List
+    }
+
+    class MacroNode {
+        - name: String
+        - parameters: List<MacroParamNode>
+        - body: List<ASTNode>
+        --
+        + getName(): String
+        + getParameters(): List
+        + getBody(): List
+    }
+
+    class BlockDefinitionNode {
+        - name: String
+        - content: List<ASTNode>
+        --
+        + getName(): String
+        + getContent(): List
+    }
+
+    class WithBlockNode {
+        - assignments: List<WithAssignmentNode>
+        - body: List<ASTNode>
+        --
+        + getAssignments(): List
+        + getBody(): List
+    }
+
+    class AutoescapeBlockNode {
+        - escapeMode: EscapeModeNode
+        - body: List<ASTNode>
+        --
+        + getEscapeMode(): EscapeModeNode
+        + getBody(): List
+    }
+
+    class FilterBlockNode {
+        - filterName: String
+        - arguments: List<ArgumentNode>
+        - body: List<ASTNode>
+        --
+        + getFilterName(): String
+        + getArguments(): List
+        + getBody(): List
+    }
+
+    class CallBlockNode {
+        - macro: JinjaExpressionNode
+        - arguments: List<ArgumentNode>
+        - body: List<ASTNode>
+        --
+        + getMacro(): JinjaExpressionNode
+        + getArguments(): List
+        + getBody(): List
+    }
+}
+
+ASTNode <|-- ForBlockNode
+ASTNode <|-- IfBlockNode
+ASTNode <|-- MacroNode
+ASTNode <|-- BlockDefinitionNode
+ASTNode <|-- WithBlockNode
+ASTNode <|-- AutoescapeBlockNode
+ASTNode <|-- FilterBlockNode
+ASTNode <|-- CallBlockNode
+
+ForBlockNode *-- JinjaExpressionNode
+IfBlockNode *-- JinjaExpressionNode
+MacroNode o-- "many" ASTNode
+BlockDefinitionNode o-- "many" ASTNode
+WithBlockNode o-- "many" ASTNode
+FilterBlockNode o-- "many" ASTNode
+CallBlockNode *-- JinjaExpressionNode
+CallBlockNode o-- "many" ASTNode
+
+' ==================== Jinja2 Statements ====================
+
+package "ast.jinja2.statements" <<Rectangle>> {
+
+    class SetStatementNode {
+        - target: TargetNode
+        - value: JinjaExpressionNode
+        --
+        + getTarget(): TargetNode
+        + getValue(): JinjaExpressionNode
+    }
+
+    class SetBlockNode {
+        - target: TargetNode
+        - content: List<ASTNode>
+        --
+        + getTarget(): TargetNode
+        + getContent(): List
+    }
+
+    class ImportNode {
+        - template: String
+        - alias: String
+        --
+        + getTemplate(): String
+        + getAlias(): String
+    }
+
+    class FromImportNode {
+        - template: String
+        - items: List<FromImportItemNode>
+        --
+        + getTemplate(): String
+        + getItems(): List
+    }
+
+    class IncludeNode {
+        - template: String
+        - ignoreMissing: boolean
+        - withContext: boolean
+        --
+        + getTemplate(): String
+        + isIgnoreMissing(): boolean
+        + isWithContext(): boolean
+    }
+
+    class ExtendsNode {
+        - template: String
+        --
+        + getTemplate(): String
+    }
+
+    class DoStatementNode {
+        - expression: JinjaExpressionNode
+        --
+        + getExpression(): JinjaExpressionNode
+    }
+}
+
+ASTNode <|-- SetStatementNode
+ASTNode <|-- SetBlockNode
+ASTNode <|-- ImportNode
+ASTNode <|-- FromImportNode
+ASTNode <|-- IncludeNode
+ASTNode <|-- ExtendsNode
+ASTNode <|-- DoStatementNode
+
+SetStatementNode *-- JinjaExpressionNode
+SetBlockNode o-- "many" ASTNode
+FromImportNode o-- "many" ASTNode
+DoStatementNode *-- JinjaExpressionNode
+
+' ==================== Jinja2 Expressions ====================
+
+package "ast.jinja2.expressions" <<Rectangle>> {
+
+    class ExpressionBlockNode {
+        - expression: JinjaExpressionNode
+        - filters: List<FilterNode>
+        --
+        + getExpression(): JinjaExpressionNode
+        + getFilters(): List
+    }
+
+    class VariableExprNode {
+        - name: String
+        --
+        + getName(): String
+    }
+
+    class DotAccessExprNode {
+        - object: JinjaExpressionNode
+        - attribute: String
+        --
+        + getObject(): JinjaExpressionNode
+        + getAttribute(): String
+    }
+
+    class FunctionCallExprNode {
+        - function: JinjaExpressionNode
+        - arguments: List<ArgumentNode>
+        --
+        + getFunction(): JinjaExpressionNode
+        + getArguments(): List
+    }
+
+    class TernaryExprNode {
+        - condition: JinjaExpressionNode
+        - trueExpr: JinjaExpressionNode
+        - falseExpr: JinjaExpressionNode
+        --
+        + getCondition(): JinjaExpressionNode
+        + getTrueExpr(): JinjaExpressionNode
+        + getFalseExpr(): JinjaExpressionNode
+    }
+
+    class TestExprNode {
+        - expression: JinjaExpressionNode
+        - testName: String
+        - arguments: List<ArgumentNode>
+        --
+        + getExpression(): JinjaExpressionNode
+        + getTestName(): String
+        + getArguments(): List
+    }
+
+    class FilterNode {
+        - name: String
+        - arguments: List<ArgumentNode>
+        --
+        + getName(): String
+        + getArguments(): List
+    }
+}
+
+ASTNode <|-- ExpressionBlockNode
+JinjaExpressionNode <|-- VariableExprNode
+JinjaExpressionNode <|-- DotAccessExprNode
+JinjaExpressionNode <|-- FunctionCallExprNode
+JinjaExpressionNode <|-- TernaryExprNode
+JinjaExpressionNode <|-- TestExprNode
+ASTNode <|-- FilterNode
+
+ExpressionBlockNode *-- JinjaExpressionNode
+ExpressionBlockNode o-- "many" FilterNode
+DotAccessExprNode *-- JinjaExpressionNode
+FunctionCallExprNode *-- JinjaExpressionNode
+TernaryExprNode *-- "3" JinjaExpressionNode
+TestExprNode *-- JinjaExpressionNode
+
+' ==================== Jinja2 Content - HTML ====================
+
+package "ast.jinja2.content" <<Rectangle>> {
+
+    class HtmlTextNode {
+        - text: String
+        --
+        + getText(): String
+        + setText(text: String): void
+    }
+
+    abstract class HtmlElementNode {
+        # tagName: String
+        # attributes: List<HtmlAttributeNode>
+        --
+        + getTagName(): String
+        + getAttributes(): List
+        + addAttribute(attr: HtmlAttributeNode): void
+    }
+
+    class NormalHtmlElementNode {
+        - children: List<ASTNode>
+        --
+        + getChildren(): List
+        + addChild(child: ASTNode): void
+    }
+
+    class VoidHtmlElementNode {
+    }
+
+    class HtmlAttributeNode {
+        - name: String
+        - value: HtmlAttributeValueNode
+        --
+        + getName(): String
+        + getValue(): HtmlAttributeValueNode
+    }
+
+    class HtmlAttributeValueNode {
+        - parts: List<ASTNode>
+        - quoteStyle: QuoteStyle
+        --
+        + getParts(): List
+        + getQuoteStyle(): QuoteStyle
+    }
+
+    enum QuoteStyle {
+        DOUBLE, SINGLE, NONE
+    }
+}
+
+ASTNode <|-- HtmlTextNode
+ASTNode <|-- HtmlElementNode
+HtmlElementNode <|-- NormalHtmlElementNode
+HtmlElementNode <|-- VoidHtmlElementNode
+ASTNode <|-- HtmlAttributeNode
+ASTNode <|-- HtmlAttributeValueNode
+
+HtmlElementNode o-- "many" HtmlAttributeNode
+NormalHtmlElementNode o-- "many" ASTNode
+HtmlAttributeNode *-- HtmlAttributeValueNode
+HtmlAttributeValueNode o-- "many" ASTNode
+HtmlAttributeValueNode --> QuoteStyle
+
+' ==================== Jinja2 Content - HTML Elements ====================
+
+package "ast.jinja2.content.elements" <<Rectangle>> {
+
+    class GenericHtmlNode {
+        - tagName: String
+        - attributes: List<HtmlAttributeNode>
+        - children: List<ASTNode>
+    }
+
+    class HtmlRootHtmlNode {
+        - attributes: List<HtmlAttributeNode>
+        - children: List<ASTNode>
+    }
+
+    class HeadHtmlNode {
+        - attributes: List<HtmlAttributeNode>
+        - children: List<ASTNode>
+    }
+
+    class BodyHtmlNode {
+        - attributes: List<HtmlAttributeNode>
+        - children: List<ASTNode>
+    }
+
+    class DivHtmlNode {
+        - attributes: List<HtmlAttributeNode>
+        - children: List<ASTNode>
+    }
+
+    class FormHtmlNode {
+        - attributes: List<HtmlAttributeNode>
+        - children: List<ASTNode>
+    }
+
+    class InputHtmlNode {
+        - attributes: List<HtmlAttributeNode>
+    }
+
+    class StyleHtmlNode {
+        - attributes: List<HtmlAttributeNode>
+        - stylesheet: CSSStylesheetNode
+    }
+}
+
+NormalHtmlElementNode <|-- GenericHtmlNode
+NormalHtmlElementNode <|-- HtmlRootHtmlNode
+NormalHtmlElementNode <|-- HeadHtmlNode
+NormalHtmlElementNode <|-- BodyHtmlNode
+NormalHtmlElementNode <|-- DivHtmlNode
+NormalHtmlElementNode <|-- FormHtmlNode
+NormalHtmlElementNode <|-- StyleHtmlNode
+VoidHtmlElementNode <|-- InputHtmlNode
+
+StyleHtmlNode *-- "1" ASTNode : contains CSS
+
+' ==================== CSS AST ====================
+
+package "ast.css" <<Rectangle>> {
+
+    class CSSStylesheetNode {
+        - rules: List<CSSRuleNode>
+        --
+        + getRules(): List
+        + addRule(rule: CSSRuleNode): void
+    }
+
+    class CSSRuleNode {
+        - selector: CSSSelectorNode
+        - declarations: List<CSSDeclarationNode>
+        --
+        + getSelector(): CSSSelectorNode
+        + getDeclarations(): List
+    }
+
+    class CSSDeclarationNode {
+        - property: CSSPropertyNode
+        --
+        + getProperty(): CSSPropertyNode
+    }
+
+    abstract class CSSNode {
+        + CSSNode(nodeName, lineNumber)
+    }
+
+    abstract class CSSSelectorNode {
+    }
+
+    abstract class CSSPropertyNode {
+        # propertyName: String
+        --
+        + getPropertyName(): String
+    }
+
+    abstract class CSSValueNode {
+    }
+}
+
+ASTNode <|-- CSSNode
+CSSNode <|-- CSSStylesheetNode
+CSSNode <|-- CSSRuleNode
+CSSNode <|-- CSSDeclarationNode
+CSSNode <|-- CSSSelectorNode
+CSSNode <|-- CSSPropertyNode
+CSSNode <|-- CSSValueNode
+
+CSSStylesheetNode o-- "many" CSSRuleNode
+CSSRuleNode *-- CSSSelectorNode
+CSSRuleNode o-- "many" CSSDeclarationNode
+CSSDeclarationNode *-- CSSPropertyNode
+
+' ==================== CSS Selectors ====================
+
+package "ast.css.selectors" <<Rectangle>> {
+
+    class CSSElementSelectorNode {
+        - tagName: String
+        --
+        + getTagName(): String
+    }
+
+    class CSSClassSelectorNode {
+        - className: String
+        --
+        + getClassName(): String
+    }
+
+    class CSSDescendantSelectorNode {
+        - parent: CSSSelectorNode
+        - child: CSSSelectorNode
+        --
+        + getParent(): CSSSelectorNode
+        + getChild(): CSSSelectorNode
+    }
+
+    class CSSPseudoClassSelectorNode {
+        - selector: CSSSelectorNode
+        - pseudoClass: String
+        --
+        + getSelector(): CSSSelectorNode
+        + getPseudoClass(): String
+    }
+}
+
+CSSSelectorNode <|-- CSSElementSelectorNode
+CSSSelectorNode <|-- CSSClassSelectorNode
+CSSSelectorNode <|-- CSSDescendantSelectorNode
+CSSSelectorNode <|-- CSSPseudoClassSelectorNode
+
+CSSDescendantSelectorNode *-- "2" CSSSelectorNode
+CSSPseudoClassSelectorNode *-- CSSSelectorNode
+
+' ==================== CSS Properties ====================
+
+package "ast.css.properties" <<Rectangle>> {
+
+    class ColorPropertyNode {
+        - value: CSSColorValueNode
+    }
+
+    class BackgroundPropertyNode {
+        - value: CSSValueNode
+    }
+
+    class FontFamilyPropertyNode {
+        - values: List<String>
+    }
+
+    class FontWeightPropertyNode {
+        - value: String
+    }
+
+    class BorderPropertyNode {
+        - width: CSSLengthValueNode
+        - style: String
+        - color: CSSColorValueNode
+    }
+
+    class BoxShadowPropertyNode {
+        - values: List<CSSValueNode>
+    }
+
+    class TransformPropertyNode {
+        - functions: List<CSSFunctionValueNode>
+    }
+
+    class LengthPropertyNode {
+        - value: CSSLengthValueNode
+    }
+
+    class KeywordPropertyNode {
+        - value: CSSKeywordValueNode
+    }
+}
+
+CSSPropertyNode <|-- ColorPropertyNode
+CSSPropertyNode <|-- BackgroundPropertyNode
+CSSPropertyNode <|-- FontFamilyPropertyNode
+CSSPropertyNode <|-- FontWeightPropertyNode
+CSSPropertyNode <|-- BorderPropertyNode
+CSSPropertyNode <|-- BoxShadowPropertyNode
+CSSPropertyNode <|-- TransformPropertyNode
+CSSPropertyNode <|-- LengthPropertyNode
+CSSPropertyNode <|-- KeywordPropertyNode
+
+ColorPropertyNode *-- CSSValueNode
+BackgroundPropertyNode *-- CSSValueNode
+BorderPropertyNode *-- "2" CSSValueNode
+BoxShadowPropertyNode o-- "many" CSSValueNode
+TransformPropertyNode o-- "many" CSSValueNode
+LengthPropertyNode *-- CSSValueNode
+KeywordPropertyNode *-- CSSValueNode
+
+' ==================== CSS Values ====================
+
+package "ast.css.values" <<Rectangle>> {
+
+    class CSSColorValueNode {
+        - color: String
+        --
+        + getColor(): String
+    }
+
+    class CSSLengthValueNode {
+        - value: double
+        - unit: String
+        --
+        + getValue(): double
+        + getUnit(): String
+    }
+
+    class CSSNumberValueNode {
+        - value: double
+        --
+        + getValue(): double
+    }
+
+    class CSSKeywordValueNode {
+        - keyword: String
+        --
+        + getKeyword(): String
+    }
+
+    class CSSFunctionValueNode {
+        - functionName: String
+        - arguments: List<CSSValueNode>
+        --
+        + getFunctionName(): String
+        + getArguments(): List
+    }
+}
+
+CSSValueNode <|-- CSSColorValueNode
+CSSValueNode <|-- CSSLengthValueNode
+CSSValueNode <|-- CSSNumberValueNode
+CSSValueNode <|-- CSSKeywordValueNode
+CSSValueNode <|-- CSSFunctionValueNode
+
+CSSFunctionValueNode o-- "many" CSSValueNode
+
+' ==================== Legend ====================
+
+legend right
+    |= Symbol |= Meaning |
+    | <size:14>◁───</size> | Inheritance (extends) |
+    | <size:14>◇───</size> | Aggregation (has-a, weak) |
+    | <size:14>◆───</size> | Composition (has-a, strong) |
+    | <size:14>- - -></size> | Dependency (uses) |
+
+    **Total Classes:** 136+
+    **Main Packages:**
+    - ast.node (base)
+    - ast.python (47 classes)
+    - ast.jinja2 (60 classes)
+    - ast.css (30 classes)
+endlegend
+
+@enduml
