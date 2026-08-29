@@ -284,7 +284,7 @@ public class Main {
             System.out.println("\n" + TEAL + "📋 Symbol Table:" + RESET);
             result.symbolTable.printAll();
 
-            System.out.println("\n" + TEAL + "🧠 Semantic Analysis:" + RESET);
+            System.out.println("\n" + TEAL + " Semantic Analysis:" + RESET);
             if (result.semanticErrors.isEmpty()) {
                 System.out.println(TEAL + "   لا يوجد أخطاء دلالية." + RESET);
             } else {
@@ -374,7 +374,7 @@ public class Main {
             System.out.println("\n" + TEAL + "📋 Symbol Table:" + RESET);
             result.symbolTable.printAll();
 
-            System.out.println("\n" + TEAL + "🧠 Semantic Analysis:" + RESET);
+            System.out.println("\n" + TEAL + " Semantic Analysis:" + RESET);
             if (result.semanticErrors.isEmpty()) {
                 System.out.println(TEAL + "   لا يوجد أخطاء دلالية." + RESET);
             } else {

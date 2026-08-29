@@ -60,11 +60,7 @@ public class ASTBuilder extends pythonParserBaseVisitor<ASTNode> {
         semanticErrors.add(new SemanticError(type, message, line, col));
     }
 
-    /**
-     * تعريف معامل (parameter) بالنطاق الحالي مع كشف التكرار.
-     * إذا كان الاسم معرّف مسبقاً بنفس نطاق الدالة (سواء regular/*args/kwonly/**kwargs)
-     * يتم تسجيل خطأ DUPLICATE_PARAMETER بدل الكتابة فوق الرمز القديم بصمت.
-     */
+
     private void defineParamChecked(String paramName, String functionName, int line, int col) {
         if (currentScope.isDefinedLocally(paramName)) {
             addError(SemanticError.ErrorType.DUPLICATE_PARAMETER,
@@ -622,10 +618,7 @@ public class ASTBuilder extends pythonParserBaseVisitor<ASTNode> {
         return dictNode;
     }
 
-    /**
-     * يرجّع "توقيع" ثابت للمفتاح إذا كان قيمة حرفية بسيطة (نص أو رقم) يمكن مقارنتها،
-     * أو null إذا كان المفتاح تعبير ديناميكي (متغير، نداء دالة...) ما ممكن نتأكد من قيمته وقت الترجمة.
-     */
+
     private String staticKeySignature(ExpressionNode key) {
         if (key instanceof StringNode) {
             return "'" + ((StringNode) key).getValue() + "'";

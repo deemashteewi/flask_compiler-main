@@ -33,12 +33,7 @@ import antlr.ast.python.parameters.*;
 import antlr.ast.python.statements.*;
 import antlr.ast.visitor.ASTVisitor;
 
-/**
- * طابعة الشجرة المجردة (AST Printer) تطبع الشجرة بشكل مقروء ومنسق
- *
- * المتطلبات المحققة: - طباعة كل عقدة مع معلوماتها - طباعة الأبناء بشكل متداخل -
- * طباعة مقروءة وواضحة
- */
+
 public class ASTPrinter implements ASTVisitor<String> {
 
     // ==================== ANSI Colors (Custom Palette) ====================

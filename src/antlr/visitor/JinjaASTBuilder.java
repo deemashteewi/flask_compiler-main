@@ -93,7 +93,6 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
         }
     }
 
-    // أسماء الـ blocks المعرّفة بنفس القالب (لفحص التكرار)
     private final java.util.Set<String> definedBlockNames = new java.util.HashSet<>();
 
 
@@ -291,7 +290,6 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
                     "إعادة تعريف الـ block '" + blockName + "' بنفس القالب", line, col);
         }
 
-// إذا كتب اسم بعد {% endblock %} لازم يطابق اسم الـ block نفسه
         java.util.List<org.antlr.v4.runtime.tree.TerminalNode> names = ctx.blockDefinition().NAME();
         if (names.size() > 1) {
             String endName = names.get(1).getText();
