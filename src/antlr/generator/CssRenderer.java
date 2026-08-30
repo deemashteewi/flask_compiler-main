@@ -9,19 +9,11 @@ import antlr.ast.css.values.CSSValueNode;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * ==================== المرحلة 5: توليد الكود (Code Generation) ====================
- *
- * CssRenderer يعيد بناء نص CSS من شجرة CSSStylesheetNode (والتي تُبنى ضمن
- * عقدة &lt;style&gt; في شجرة Jinja2/HTML). يستخدمه JinjaTemplateRenderer
- * عند توليد صفحة HTML نهائية كاملة تحتوي التنسيق الأصلي.
- */
 public final class CssRenderer {
 
     private CssRenderer() {
     }
 
-    /** خصائص CSS التي تفصل قيمها بفاصلة بدل مسافة (مثال: font-family). */
     private static boolean isCommaSeparated(String property) {
         return "font-family".equalsIgnoreCase(property);
     }
@@ -61,8 +53,7 @@ public final class CssRenderer {
         if (values == null || values.isEmpty()) {
             return "";
         }
-        // box-shadow: كل ظل مكوّن من 4 قيم (offsetX offsetY blur color)،
-        // والظلال المتعددة تُفصل بفاصلة.
+
         if ("box-shadow".equalsIgnoreCase(property) && values.size() % 4 == 0 && values.size() > 4) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < values.size(); i += 4) {

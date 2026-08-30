@@ -20,16 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * ==================== المرحلة 5: توليد الكود (Code Generation) ====================
- *
- * CodeGenerator هو التابع المولّد (Generator) المطلوب في متطلبات المشروع:
- * يأخذ كود Python المصدر (المحتوي على مصفوفة/قائمة بيانات، مثال: products)
- * وقالب Jinja2/HTML، ويبني شجرتي AST المستقلتين لكل منهما (عبر ASTBuilder
- * و JinjaASTBuilder بالترتيب)، ثم يمرر مصفوفة البيانات المستخرجة من الشجرة
- * الأولى (Python) إلى الشجرة الثانية (Jinja2) لتوليد صفحة HTML نهائية كاملة
- * تعمل فيها كلا القطعتين المولّدتين معاً.
- */
+
 public class CodeGenerator {
 
     public static class GenerationResult {
@@ -48,17 +39,11 @@ public class CodeGenerator {
         return generate(pythonSource, templateSource, dataVarName, null);
     }
 
-    /**
-     * نفس التابع أعلاه، مع إمكانية تمرير متغيرات إضافية (extraVariables) تُدمج
-     * مع البيانات المستخرجة من كود Python قبل عملية التصيير (render). يُستخدم هذا
-     * مثلاً لتوليد صفحة "تفاصيل منتج" أو "حذف منتج" التي يحتاج قالبها إلى متغير
-     * مفرد (product) وليس فقط المصفوفة الكاملة (products) المستخرجة من الشجرة الأولى.
-     */
+
     public GenerationResult generate(String pythonSource, String templateSource, String dataVarName,
                                       Map<String, Object> extraVariables) {
         GenerationResult result = new GenerationResult();
 
-        // ---- 1) بناء الشجرة الأولى: AST الخاصة بكود Python ----
         ASTNode pythonAst;
         try {
             CharStream pyInput = CharStreams.fromString(pythonSource);
@@ -79,7 +64,6 @@ public class CodeGenerator {
             return result;
         }
 
-        // ---- 2) بناء الشجرة الثانية: AST الخاصة بقالب Jinja2 ----
         ASTNode templateAst;
         try {
             CharStream tplInput = CharStreams.fromString(templateSource);
@@ -100,7 +84,6 @@ public class CodeGenerator {
             return result;
         }
 
-        // ---- 3) التابع المولّد: تمرير مصفوفة بيانات Python إلى شجرة Jinja2 ----
         try {
             PythonDataExtractor extractor = new PythonDataExtractor();
             Map<String, Object> variables = extractor.extract((ProgramNode) pythonAst);
@@ -110,7 +93,6 @@ public class CodeGenerator {
                 result.errors.add("Variable '" + dataVarName + "' was not found in the Python source.");
             }
 
-            // دمج المتغيرات الإضافية (إن وجدت) فوق البيانات المستخرجة، دون فقدان الأخيرة
             Map<String, Object> renderContext = new LinkedHashMap<>(variables);
             if (extraVariables != null) {
                 renderContext.putAll(extraVariables);

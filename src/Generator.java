@@ -16,22 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-/**
- * مرحلة التوليد (Code Generation) - المتطلب 5
- *
- * يقرأ tests/flask/app.py وقوالب tests/flask/templates/*.html،
- * يشغّل خط الأنابيب الموجود أصلاً في Main (Lexer -> Parser -> AST -> Semantic)
- * على كل ملف، ثم:
- *   1) يكتب compiler_output/ : ast_python.json, ast_jinja.json,
- *      semantic_report.txt, generation_log.txt
- *   2) يكتب output/ : الصفحات المولّدة (HTML بعد استبدال المتغيرات)
- *      + نسخة من app.py كملف مرافق
- *
- * ملاحظة صريحة: توليد الـ HTML هنا هو استبدال نصي مبسّط (mini template
- * substitution) لـ {{ var }} و {{ var.field }} و {% for %} و {% if %}،
- * وليس تفسيرًا كاملاً لكل عقد شجرة Jinja الـ 150+. ملفات ast_*.json
- * بالمقابل مبنية فعليًا من الشجرة الحقيقية التي ينتجها ASTBuilder/JinjaASTBuilder.
- */
+
 public class Generator {
 
     private static final String FLASK_APP = "tests/flask/app.py";
@@ -48,7 +33,6 @@ public class Generator {
             Files.createDirectories(Paths.get(OUTPUT_DIR));
             Files.createDirectories(Paths.get(COMPILER_OUTPUT_DIR));
 
-            // ==================== 1) تحليل app.py ====================
             String pythonSource = Files.readString(Paths.get(FLASK_APP));
             log("قراءة " + FLASK_APP + " (" + pythonSource.length() + " حرف)");
 
@@ -60,11 +44,9 @@ public class Generator {
                     toJson(pythonResult.ast));
             log("كتابة compiler_output/ast_python.json");
 
-            // ==================== 2) استخراج بيانات products من app.py ====================
             List<Map<String, Object>> products = extractProducts(pythonSource);
             log("استخراج " + products.size() + " عنصر من مصفوفة products (Generator -> Context Data)");
 
-            // ==================== 3) تحليل قوالب Jinja ====================
             Map<String, ASTNode> jinjaAsts = new LinkedHashMap<>();
             Map<String, List<SemanticError>> jinjaErrors = new LinkedHashMap<>();
 
@@ -85,15 +67,13 @@ public class Generator {
                 log("تحليل " + name + ": " + (jinjaResult.success ? "نجح" : "فشل")
                         + " | أخطاء دلالية: " + jinjaResult.semanticErrors.size());
 
-                // ==================== 4) بناء بيانات السياق (Context Data) ====================
+
                 Map<String, Object> context = new HashMap<>();
                 context.put("products", products);
                 if (!products.isEmpty()) {
-                    // ملف تفاصيل منتج واحد: نعرض أول منتج كمثال توضيحي للتوليد
                     context.put("product", products.get(0));
                 }
 
-                // ==================== 5) التوليد الفعلي: render_template ====================
                 String rendered = renderTemplate(templateSource, context);
                 Files.writeString(Paths.get(OUTPUT_DIR, name), rendered);
                 log("توليد " + OUTPUT_DIR + "/" + name);
@@ -103,12 +83,10 @@ public class Generator {
                     jinjaAstsToJson(jinjaAsts));
             log("كتابة compiler_output/ast_jinja.json");
 
-            // ==================== 6) نسخ الملفات المرافقة دون معالجة ====================
             Files.copy(Paths.get(FLASK_APP), Paths.get(OUTPUT_DIR, "app.py"),
                     StandardCopyOption.REPLACE_EXISTING);
             log("نسخ app.py إلى " + OUTPUT_DIR + " دون أي معالجة إضافية");
 
-            // ==================== 7) تقرير الأخطاء الدلالية ====================
             writeSemanticReport(pythonResult, jinjaErrors);
             log("كتابة compiler_output/semantic_report.txt");
 
@@ -131,7 +109,6 @@ public class Generator {
         logLines.add(line);
     }
 
-    // ==================== AST -> JSON (عام لأي نوع عقدة) ====================
 
     private static String toJson(ASTNode node) {
         if (node == null) return "null";
@@ -175,7 +152,6 @@ public class Generator {
                 .replace("\r", "") + "\"";
     }
 
-    // ==================== تقرير الأخطاء الدلالية ====================
 
     private static void writeSemanticReport(Main.CompilationResult pythonResult,
                                              Map<String, List<SemanticError>> jinjaErrors) throws IOException {
@@ -207,7 +183,6 @@ public class Generator {
         Files.writeString(Paths.get(COMPILER_OUTPUT_DIR, "semantic_report.txt"), sb.toString());
     }
 
-    // ==================== استخراج مصفوفة products من app.py ====================
 
     private static List<Map<String, Object>> extractProducts(String pythonSource) {
         List<Map<String, Object>> result = new ArrayList<>();
@@ -241,7 +216,6 @@ public class Generator {
         return result;
     }
 
-    // ==================== محرك استبدال مبسّط لقوالب Jinja ====================
 
     private static String renderTemplate(String src, Map<String, Object> context) {
         // {% for item in list %} ... {% endfor %}

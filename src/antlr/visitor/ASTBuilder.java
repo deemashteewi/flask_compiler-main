@@ -33,7 +33,7 @@ public class ASTBuilder extends pythonParserBaseVisitor<ASTNode> {
     private int functionDepth = 0;
     private boolean suppressUndefinedCheck = false;
 
-    // أسماء بايثون المدمجة (builtins) التي لا تحتاج تعريف
+    // أسماء بايثون المدمجة (builtins)
     private static final java.util.Set<String> BUILTINS = java.util.Set.of(
             "name", "file", "doc", "self", "print", "len", "range",
             "str", "int", "float", "bool", "list", "dict", "set", "tuple",
@@ -171,7 +171,6 @@ public class ASTBuilder extends pythonParserBaseVisitor<ASTNode> {
                     classCtx.getStart().getCharPositionInLine());
             importStmt.addImportedClass(classNode);
 
-            // تسجيل الاسم المستورد بجدول الرموز حتى ما يُعتبر "غير معرّف" لاحقاً
             currentScope.define(className, Symbol.SymbolType.FUNCTION,
                     classCtx.getStart().getLine(), classCtx.getStart().getCharPositionInLine());
         }
@@ -207,7 +206,6 @@ public class ASTBuilder extends pythonParserBaseVisitor<ASTNode> {
 
         ExpressionNode mainCondition = (ExpressionNode) visit(conditions.get(0));
 
-        // if/elif/else ببايثون ما بعملوا block scope
         BlockNode ifBlock = (BlockNode) visit(blocks.get(0));
 
         List<ExpressionNode> elifConditions = new ArrayList<>();

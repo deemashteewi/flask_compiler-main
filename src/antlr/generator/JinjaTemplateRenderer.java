@@ -48,21 +48,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * ==================== المرحلة 5: توليد الكود (Code Generation) ====================
- *
- * JinjaTemplateRenderer يمثّل الجزء الثاني من التابع المولّد (Generator):
- * يزور شجرة AST الخاصة بقالب Jinja2/HTML (الشجرة الثانية) ويولّد منها
- * نص HTML نهائي حقيقي، معتمداً على بيانات السياق (context) الممرّرة إليه
- * (والتي أتت أصلاً من مصفوفة بيانات Python عبر PythonDataExtractor).
- *
- * هذا هو التابع الذي يربط الشجرتين ببعضهما فعلياً (Python -> Jinja2)
- * ويثبت أن الأجزاء المولّدة (Python AST + Jinja2 AST) قادرة على العمل معاً.
- */
+
 public class JinjaTemplateRenderer {
 
-    // مكدس نطاقات (Scopes) للمتغيرات: كل نطاق هو Map اسم -> قيمة.
-    // يسمح هذا بدعم متغيرات حلقات for المتداخلة دون كسر السياق الأصلي.
     private final Deque<Map<String, Object>> scopes = new ArrayDeque<>();
 
     public String render(TemplateNode template, Map<String, Object> context) {
@@ -81,7 +69,6 @@ public class JinjaTemplateRenderer {
         return sb.toString();
     }
 
-    // ==================== توليد العقد (Node Dispatch) ====================
 
     private void renderNode(ASTNode node, StringBuilder sb) {
         if (node == null) {
@@ -100,8 +87,6 @@ public class JinjaTemplateRenderer {
         } else if (node instanceof HtmlElementNode) {
             renderHtmlElement((HtmlElementNode) node, sb);
         }
-        // باقي أنواع العقد (set/macro/import/include/...) غير مستخدمة في
-        // قوالب واجهات المنتجات الحالية، لذلك يتم تجاهلها بأمان هنا.
     }
 
     private void renderExpressionBlock(ExpressionBlockNode block, StringBuilder sb) {
@@ -222,7 +207,6 @@ public class JinjaTemplateRenderer {
         return sb.toString();
     }
 
-    // ==================== ربط أهداف الحلقات (for target binding) ====================
 
     private void bindTarget(TargetNode target, Object item, Map<String, Object> scope) {
         if (target instanceof SimpleTargetNode) {
@@ -262,7 +246,6 @@ public class JinjaTemplateRenderer {
         return Collections.emptyList();
     }
 
-    // ==================== تقييم التعابير (Expression Evaluation) ====================
 
     private Object evaluate(JinjaExpressionNode expr) {
         if (expr == null) {
@@ -339,7 +322,6 @@ public class JinjaTemplateRenderer {
         if (expr instanceof FunctionCallExprNode) {
             return evalFunctionCall((FunctionCallExprNode) expr);
         }
-        // fallback: تمثيل نصي بسيط بدل تجاهل التعبير كلياً
         return expr.toValueString();
     }
 
@@ -387,7 +369,6 @@ public class JinjaTemplateRenderer {
         return null;
     }
 
-    // ==================== العمليات (Operators) ====================
 
     private Object evalComparison(JinjaComparisonNode node) {
         Object left = evaluate(node.getLeft());
@@ -484,8 +465,6 @@ public class JinjaTemplateRenderer {
     }
 
     private Object evalFunctionCall(FunctionCallExprNode call) {
-        // دعم أساسي لبعض التوابع الشائعة فقط (range, len)؛ غير مستخدم في
-        // قوالب واجهات المنتجات الحالية لكنه يوسّع الشجرة الثانية بأمان.
         String name = call.getCallable() != null ? call.getCallable().getFullPath() : "";
         List<Object> args = new ArrayList<>();
         for (ArgumentNode arg : call.getArguments()) {
@@ -500,7 +479,6 @@ public class JinjaTemplateRenderer {
         return call.toValueString();
     }
 
-    // ==================== الفلاتر (Filters) ====================
 
     private Object applyFilter(FilterNode filter, Object value) {
         String name = filter.getName() == null ? "" : filter.getName().toLowerCase(Locale.ROOT);
@@ -530,7 +508,6 @@ public class JinjaTemplateRenderer {
         }
     }
 
-    // ==================== أدوات مساعدة (Helpers) ====================
 
     private boolean truthy(Object value) {
         if (value == null) return false;

@@ -115,11 +115,7 @@ public class Main {
             if (args[i].equals("--hide-whitespace") || args[i].equals("-w")) {
                 hideWhitespace = true;
             } else if (args[i].equals("--generate") || args[i].equals("-g")) {
-                // ==================== المرحلة 5: توليد الكود ====================
-                // يشغّل CodeGenerator على تطبيق Flask التجريبي (tests/flask) ويولّد
-                // صفحات HTML نهائية كاملة (products / add / detail / delete) داخل
-                // مجلد output/، إثباتاً عملياً بأن الأجزاء المولّدة (Python AST +
-                // Jinja2 AST) قادرة على العمل معاً.
+
                 generateWebsite();
                 return;
             } else {
@@ -129,10 +125,9 @@ public class Main {
         }
 
         if (args.length > 0 && fileArgIndex < args.length && !args[fileArgIndex].startsWith("-")) {
-            // تشغيل ملف محدد
+
             compile(args[fileArgIndex]);
         } else if (args.length == 0 || (args.length > 0 && args[fileArgIndex - 1].startsWith("-"))) {
-            // تشغيل جميع الاختبارات
             runAllTests(testsDir);
         } else {
             System.out.println(TEAL + "Usage: " + RESET + "java Main [--hide-whitespace | -w] [--generate | -g] [file]");
@@ -180,13 +175,11 @@ public class Main {
 
             String sourceCode = Files.readString(filePath);
 
-            // عرض الكود المصدري
             System.out.println("\n" + TEAL + "📄 Source Code:" + RESET);
             System.out.println(GRAY + "─".repeat(40) + RESET);
             System.out.println(LIGHT + sourceCode + RESET);
             System.out.println(GRAY + "─".repeat(40) + RESET);
 
-            // بدء الترجمة - Route based on file extension
             CompilationResult result;
             if (filePathStr.endsWith(".py")) {
                 result = compilePythonSource(sourceCode);
@@ -197,11 +190,10 @@ public class Main {
                 result.errors.add("Unsupported file type: " + fileName);
             }
 
-            // عرض النتائج
             if (result.success) {
-                System.out.println("\n" + TEAL + "✅ Compilation successful!" + RESET);
+                System.out.println("\n" + TEAL + " Compilation successful!" + RESET);
             } else {
-                System.out.println("\n" + RED + "❌ Compilation failed!" + RESET);
+                System.out.println("\n" + RED + " Compilation failed!" + RESET);
                 for (String error : result.errors) {
                     System.out.println(RED + "   Error: " + error + RESET);
                 }
@@ -410,24 +402,7 @@ public class Main {
         public java.util.List<SemanticError> semanticErrors = new java.util.ArrayList<>();
     }
     
-    /**
-     * ==================== المرحلة 5: توليد الكود (Code Generation) ====================
-     *
-     * يشغّل المترجم على تطبيق Flask التجريبي الموجود في tests/flask، بحسب
-     * المخطط الموضّح في الإعلان التوضيحي:
-     *
-     *   app.py --Python Parser--> Python AST --Semantic--> Generator
-     *          --Context Data--> render_template() --Jinja Parser--> Jinja AST
-     *          --تبديل المتغيرات--> HTML --> المتصفح
-     *
-     * الخرج:
-     *  - output/                 : الصفحات المولّدة فعلياً (index.html, add_product.html,
-     *                              product_detail.html, delete_product.html) + نسخ عن
-     *                              الملفات المرافقة كما هي (app.py, style.css) دون أي معالجة.
-     *  - compiler_output/        : نواتج مراحل التحليل والتوليد:
-     *                              ast_python.json, ast_jinja.json,
-     *                              semantic_report.txt, generation_log.txt
-     */
+
     public static void generateWebsite() {
         String appPyPath = "tests/flask/app.py";
         String templatesDir = "tests/flask/templates";
@@ -449,7 +424,6 @@ public class Main {
 
             String pythonSource = Files.readString(Paths.get(appPyPath));
 
-            // ---- 1) تحليل app.py (المراحل 1-4) لبناء شجرته الدلالية ----
             log.append("[app.py] Compiling Python source...\n");
             CompilationResult pythonResult = compilePythonSource(pythonSource);
             log.append("  success=").append(pythonResult.success)
@@ -463,7 +437,6 @@ public class Main {
                     astNodeToJson(pythonResult.ast, 0) + "\n");
             log.append("  -> ").append(compilerOutDir).append("/ast_python.json written\n\n");
 
-            // ---- 2) تحليل كل قوالب Jinja2 (المراحل 1-4) وتجميع أشجارها بملف واحد ----
             String[] templateFiles = {
                     "products.html", "add_product.html", "product_detail.html", "delete_product.html"
             };
@@ -490,17 +463,13 @@ public class Main {
             Files.writeString(Paths.get(compilerOutDir, "semantic_report.txt"), semanticReport.toString());
             log.append("[report] ").append(compilerOutDir).append("/semantic_report.txt written\n\n");
 
-            // ==================== المرحلة 5 نفسها: Generator + Context Data + render ====================
             CodeGenerator generator = new CodeGenerator();
             log.append("[generate] Running Generator (Context Data -> render_template)...\n");
 
-            // ---- صفحة المنتجات (index.html): تحتاج فقط المصفوفة "products" ----
             String productsTpl = Files.readString(Paths.get(templatesDir, "products.html"));
             CodeGenerator.GenerationResult indexResult = generator.generate(pythonSource, productsTpl, "products");
             writeGeneratedFile(outDir, "index.html", indexResult, log);
 
-            // نحضّر منتجاً مفرداً (أول عنصر في products) لصفحتي تفاصيل/حذف منتج،
-            // لأن قالبهما يحتاج متغير product مفرد وليس المصفوفة الكاملة.
             Object firstProduct = null;
             if (indexResult.extractedData != null) {
                 Object productsList = indexResult.extractedData.get("products");
@@ -514,24 +483,20 @@ public class Main {
             Map<String, Object> productContext = new LinkedHashMap<>();
             productContext.put("product", firstProduct);
 
-            // ---- صفحة تفاصيل منتج ----
             String detailTpl = Files.readString(Paths.get(templatesDir, "product_detail.html"));
             CodeGenerator.GenerationResult detailResult =
                     generator.generate(pythonSource, detailTpl, "products", productContext);
             writeGeneratedFile(outDir, "product_detail.html", detailResult, log);
 
-            // ---- صفحة حذف منتج ----
             String deleteTpl = Files.readString(Paths.get(templatesDir, "delete_product.html"));
             CodeGenerator.GenerationResult deleteResult =
                     generator.generate(pythonSource, deleteTpl, "products", productContext);
             writeGeneratedFile(outDir, "delete_product.html", deleteResult, log);
 
-            // ---- صفحة إضافة منتج: لا تحتاج بيانات من Python (نموذج فارغ) ----
             String addTpl = Files.readString(Paths.get(templatesDir, "add_product.html"));
             CodeGenerator.GenerationResult addResult = generator.generate(pythonSource, addTpl, null);
             writeGeneratedFile(outDir, "add_product.html", addResult, log);
 
-            // ---- نسخ الملفات المرافقة كما هي دون أي معالجة (app.py, style.css) ----
             Files.copy(Paths.get(appPyPath), Paths.get(outDir, "app.py"),
                     java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             log.append("[copy] app.py copied as-is to ").append(outDir).append("/app.py\n");
@@ -542,13 +507,12 @@ public class Main {
                         java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                 log.append("[copy] style.css copied as-is to ").append(outDir).append("/style.css\n");
             }
-            // ملاحظة: script.js اختياري وغير موجود في هذا المشروع، لذا لم يُنسخ.
 
             log.append("\nFinished: ").append(java.time.LocalDateTime.now()).append("\n");
             Files.writeString(Paths.get(compilerOutDir, "generation_log.txt"), log.toString());
 
-            System.out.println("\n" + TEAL + "✅ Generated pages written to '" + outDir + "/'." + RESET);
-            System.out.println(TEAL + "✅ Compiler analysis artifacts written to '" + compilerOutDir + "/'." + RESET);
+            System.out.println("\n" + TEAL + " Generated pages written to '" + outDir + "/'." + RESET);
+            System.out.println(TEAL + " Compiler analysis artifacts written to '" + compilerOutDir + "/'." + RESET);
         } catch (IOException e) {
             System.err.println(RED + "Error during code generation: " + e.getMessage() + RESET);
             log.append("\nERROR: ").append(e.getMessage()).append("\n");
@@ -576,8 +540,7 @@ public class Main {
                                             CodeGenerator.GenerationResult result, StringBuilder log) {
         try {
             if (result.success) {
-                // إعادة الرابط النسبي لملف الأنماط بحيث يعمل style.css كملف مستقل
-                // بجانب صفحات output/ (بدل مسار /static/ الخاص بخادم Flask نفسه).
+
                 String html = result.html.replace("/static/style.css", "style.css");
                 Files.writeString(Paths.get(outDir, fileName), html);
                 System.out.println(TEAL + "   ✔ " + LIGHT + fileName + RESET + TEAL + " generated successfully." + RESET);
@@ -596,10 +559,7 @@ public class Main {
         }
     }
 
-    /**
-     * تحويل شجرة AST (Python أو Jinja2) إلى JSON عام يشمل اسم العقدة، رقم السطر
-     * والعمود، أي معلومات إضافية خاصة بالعقدة (extra info)، وأبناءها بشكل متكرر.
-     */
+
     private static String astNodeToJson(ASTNode node, int indentLevel) {
         String pad = "  ".repeat(indentLevel);
         String childPad = "  ".repeat(indentLevel + 1);
@@ -635,10 +595,7 @@ public class Main {
         return sb.toString();
     }
 
-    /**
-     * يستخرج المعلومات الإضافية الخاصة بعقدة واحدة (extra info) بالاعتماد على
-     * toString(0) العام دون الحاجة للوصول إلى getExtraInfo() المحمية.
-     */
+
     private static String extractExtraInfo(ASTNode node) {
         String full = node.toString(0);
         int nl = full.indexOf('\n');
@@ -675,9 +632,7 @@ public class Main {
         return sb.toString();
     }
 
-    /**
-     * مستمع الأخطاء
-     */
+
     public static class CompilerErrorListener extends BaseErrorListener {
         private final CompilationResult result;
         

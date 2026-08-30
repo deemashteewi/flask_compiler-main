@@ -55,7 +55,7 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
     private int forLoopDepth = 0;
     private boolean extendsSeen = false;
 
-    // أسماء جينجا2 المدمجة (لا تحتاج تعريف)
+    // أسماء جينجا2 المدمجة
     private static final java.util.Set<String> JINJA_BUILTINS = java.util.Set.of(
             "loop", "self", "super", "varargs", "kwargs", "range", "dict",
             "lipsum", "cycler", "joiner", "namespace",
@@ -63,7 +63,6 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
     );
 
     public JinjaASTBuilder() {
-        // متغيرات السياق المتوقعة من Flask (render_template)
         symbolTable.define("products", Symbol.SymbolType.TEMPLATE_VARIABLE, 0, 0);
         symbolTable.define("product", Symbol.SymbolType.TEMPLATE_VARIABLE, 0, 0);
     }
@@ -168,7 +167,7 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
         defineTargetInScope(targetNode, line, col);
         forLoopDepth++;
 
-// condition is optional: (IF condition=expression)?
+        // condition is optional: (IF condition=expression)?
         if (ctx.forBlock().forStart().condition != null) {
             ASTNode condition = visit(ctx.forBlock().forStart().condition);
             if (condition instanceof JinjaExpressionNode) {
@@ -238,7 +237,7 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
 
         if (extendsSeen) {
             addError(SemanticError.ErrorType.MULTIPLE_EXTENDS,
-                    "استخدام {% extends %} أكثر من مرة بنفس القالب (مسموح مرة واحدة بس)", line, col);
+                    "استخدام {% extends %} أكثر من مرة بنفس القالب ", line, col);
         }
         extendsSeen = true;
 
@@ -1289,10 +1288,7 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
         return withAssignmentNode;
     }
 
-    // ===========================HTML Elements===============================
-    // Note: visitHtmlElementPart() deleted - allows ANTLR to dispatch to specific visitor methods
 
-    // ==================== Document Structure Elements ====================
     @Override
     public ASTNode visitHtmlRootElement(jinja2Parser.HtmlRootElementContext ctx) {
         int line = safeGetLine(ctx);
@@ -1736,7 +1732,6 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
                         String text = ((jinja2Parser.AttrDqTextContext) part).text.getText();
                         valueNode.addPart(new HtmlTextNode(text, line, col));
                     } else if (part instanceof jinja2Parser.AttrDqExprContext) {
-                        // تعبير جينجا داخل القيمة — نمرّ على الـ expression إن أمكن
                         ASTNode expr = visit(((jinja2Parser.AttrDqExprContext) part).expr);
                         if (expr != null) {
                             valueNode.addPart(expr);
@@ -1964,16 +1959,11 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
 
     // ==================== CSS VALUE VISITORS ====================
 
-    /**
-     * Helper method to parse a length value and extract number and unit parts.
-     * Examples: "24px" -> ("24", "px"), "100%" -> ("100", "%"), "-1.5em" -> ("-1.5", "em")
-     */
+
     private String[] parseLengthValue(String lengthText) {
-        // Match patterns like: 24px, 100%, 1.5em, 100vh, -4px, -1.5em
         String numberPart = "";
         String unitPart = "";
 
-        // Find where the unit starts (first non-digit, non-dot, non-minus character)
         int i = 0;
         while (i < lengthText.length()) {
             char c = lengthText.charAt(i);
@@ -1990,10 +1980,7 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
         return new String[]{numberPart, unitPart};
     }
 
-    /**
-     * Helper method to safely get line number from a context.
-     * Returns 0 if the context or its start token is null.
-     */
+
     private int safeGetLine(ParserRuleContext ctx) {
         if (ctx == null || ctx.getStart() == null) {
             return 0;
@@ -2001,10 +1988,7 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
         return ctx.getStart().getLine();
     }
 
-    /**
-     * Helper method to safely get column number from a context.
-     * Returns 0 if the context or its start token is null.
-     */
+
     private int safeGetCol(ParserRuleContext ctx) {
         if (ctx == null || ctx.getStart() == null) {
             return 0;
@@ -2222,7 +2206,6 @@ public class JinjaASTBuilder extends jinja2ParserBaseVisitor<ASTNode> {
 
     // ==================== CSS LABELED ALTERNATIVE WRAPPERS ====================
 
-    // cssDeclaration alternatives (13 wrappers)
     @Override
     public ASTNode visitCssSingleLengthDecl(jinja2Parser.CssSingleLengthDeclContext ctx) {
         return visitSingleLengthDecl(ctx.singleLengthDecl());
